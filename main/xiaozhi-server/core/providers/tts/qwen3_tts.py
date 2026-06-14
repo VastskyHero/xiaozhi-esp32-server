@@ -1,9 +1,12 @@
 import os
+import io
+import math
 import uuid
 import traceback
 import requests
 import dashscope
 
+from pydub import AudioSegment
 from config.logger import setup_logging
 from core.utils.tts import MarkdownCleaner
 from core.providers.tts.base import TTSProviderBase
@@ -92,11 +95,27 @@ class TTSProvider(TTSProviderBase):
             if audio_resp.status_code != 200:
                 raise Exception(f"音频下载失败: HTTP {audio_resp.status_code}")
 
+            # ── 音量增益（服务端后处理）──────────────────────────────────
+            # Qwen3-TTS HTTP API 不支持 volume 参数，用 pydub 在服务端放大。
+            # volume=50 → 0dB（原始音量），volume=100 → +6dB
+            audio_bytes = audio_resp.content
+            if self.volume != 50:
+                gain_db = 20 * math.log10(self.volume / 50.0)
+                audio = AudioSegment.from_file(
+                    io.BytesIO(audio_bytes),
+                    format=self.audio_file_type,
+                    parameters=["-nostdin"],
+                )
+                audio = audio.apply_gain(gain_db)
+                buf = io.BytesIO()
+                audio.export(buf, format=self.audio_file_type)
+                audio_bytes = buf.getvalue()
+
             if output_file:
                 with open(output_file, "wb") as f:
-                    f.write(audio_resp.content)
+                    f.write(audio_bytes)
             else:
-                return audio_resp.content
+                return audio_bytes
 
         except Exception as e:
             logger.bind(tag=TAG).error(
