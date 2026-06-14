@@ -149,6 +149,7 @@ tmp
 .history
 .DS_Store
 main/xiaozhi-server/data
+!main/xiaozhi-server/data/.config.yaml.example
 main/xiaozhi-server/.claude
 
 main/manager-web/node_modules
