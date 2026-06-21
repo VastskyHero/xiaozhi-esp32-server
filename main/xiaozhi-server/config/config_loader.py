@@ -63,7 +63,7 @@ def load_config():
 
 
 async def get_config_from_api_async(config):
-    """从Java API获取配置（异步版本）"""
+    """从Java API获取配置（异步版本） — IntiCore: 自动补齐API缺失的模块"""
     # 初始化API客户端
     init_service(config)
 
@@ -91,6 +91,41 @@ async def get_config_from_api_async(config):
     # 如果服务器没有prompt_template，则从本地配置读取
     if not config_data.get("prompt_template"):
         config_data["prompt_template"] = config.get("prompt_template")
+
+    # IntiCore: 补齐 API 缺失的 Provider 模块（LLM/TTS/Memory/Intent/VLLM 等）
+    # 当 Java getConfig() 未返回某模块时，优先从本地备份回退，再 fallback 到 config.yaml
+    backup_path = get_project_dir() + "data/.config.yaml.local-backup"
+    backup_cfg = read_config(backup_path) if os.path.exists(backup_path) else {}
+    default_cfg = read_config(get_project_dir() + "config.yaml")
+    for module_type in ["LLM", "TTS", "Memory", "Intent", "VLLM"]:
+        if module_type not in config_data:
+            # 优先从备份读取 (含用户配置的 API Key / 模型参数)
+            sel_key = None
+            fallback_cfg = None
+            if module_type in backup_cfg and backup_cfg.get("selected_module", {}).get(module_type):
+                sel_key = backup_cfg["selected_module"][module_type]
+                fallback_cfg = backup_cfg
+            elif module_type in default_cfg and default_cfg.get("selected_module", {}).get(module_type):
+                sel_key = default_cfg["selected_module"][module_type]
+                fallback_cfg = default_cfg
+            if sel_key and fallback_cfg and sel_key in fallback_cfg.get(module_type, {}):
+                config_data[module_type] = {sel_key: fallback_cfg[module_type][sel_key]}
+                if "selected_module" not in config_data:
+                    config_data["selected_module"] = {}
+                config_data["selected_module"][module_type] = sel_key
+
+    # 补齐 prompt 和 wakeup_words（若 API 未返回）
+    # 优先级：API > 本地备份 > 默认配置
+    if not config_data.get("prompt"):
+        backup_prompt = None
+        backup_path = get_project_dir() + "data/.config.yaml.local-backup"
+        if os.path.exists(backup_path):
+            backup_cfg = read_config(backup_path)
+            backup_prompt = backup_cfg.get("prompt")
+        config_data["prompt"] = config.get("prompt") or backup_prompt or default_cfg.get("prompt", "")
+    if not config_data.get("wakeup_words"):
+        config_data["wakeup_words"] = config.get("wakeup_words") or default_cfg.get("wakeup_words", [])
+
     return config_data
 
 
