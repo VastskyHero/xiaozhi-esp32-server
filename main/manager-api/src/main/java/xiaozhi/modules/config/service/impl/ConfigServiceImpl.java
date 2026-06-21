@@ -84,27 +84,27 @@ public class ConfigServiceImpl implements ConfigService {
             throw new RenException(ErrorCode.AGENT_TEMPLATE_NOT_FOUND);
         }
 
-        // 构建模块配置
+        // 构建模块配置 (IntiCore: pass full model IDs + system prompt from default template)
         buildModuleConfig(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                agent.getVadModelId(),
-                agent.getAsrModelId(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                agent.getAgentName(),        // assistantName
+                agent.getSystemPrompt(),     // prompt
+                agent.getSummaryMemory(),    // summaryMemory
+                null,                        // voice
+                null,                        // referenceAudio
+                null,                        // referenceText
+                null,                        // language
+                agent.getTtsVolume(),        // ttsVolume
+                agent.getTtsRate(),          // ttsRate
+                agent.getTtsPitch(),         // ttsPitch
+                agent.getVadModelId(),       // vadModelId
+                agent.getAsrModelId(),       // asrModelId
+                agent.getLlmModelId(),       // llmModelId
+                agent.getVllmModelId(),      // vllmModelId
+                null,                        // slmModelId
+                agent.getTtsModelId(),       // ttsModelId
+                agent.getMemModelId(),       // memModelId
+                agent.getIntentModelId(),    // intentModelId
+                null,                        // ragModelId
                 result,
                 isCache);
 
