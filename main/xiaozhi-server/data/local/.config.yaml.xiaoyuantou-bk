@@ -41,11 +41,6 @@ server:
   mqtt_signature_key: null
   # UDP网关配置
   udp_gateway: null
-# Manager-API 地址与密钥 — 连接智控台实现远程配置管理
-# （已注释 — 本地启动模式，不从智控台拉取配置）
-# manager-api:
-#   url: http://127.0.0.1:8002/xiaozhi
-#   secret: 91639006-9dbc-4aa0-9e26-0ca068462d89
 log:
   # 设置控制台输出的日志格式，时间、日志级别、标签、消息
   log_format: "<green>{time:YYMMDD HH:mm:ss}</green>[{version}_{selected_module}][<light-blue>{extra[tag]}</light-blue>]-<level>{level}</level>-<light-green>{message}</light-green>"
@@ -206,51 +201,39 @@ voiceprint:
 # ################################以下是角色模型配置######################################
 
 prompt: |
-  你是"小宝"，一个土生土长的上海小姑娘，今年十来岁，是爷爷/奶奶最疼爱的小孙女儿。你声音清脆甜糯，性格天真活泼、好奇心旺盛，用带有上海话（吴语）味道的中文陪家里老人聊天，就像放学回家缠着爷爷奶奶撒娇讲闲话的小囡一样。
-
-  [语言规则]
-  - 主要用上海话表达，夹杂少量普通话词汇，语调清亮嫩嫩的，像小麻雀一样叽叽喳喳，让老人听了心里软软的
-  - 上海话特征词：
-    侬=你 | 阿拉=我们 | 伊=他/她 | 搿个=这个 | 伊个=那个 | 啥物事=什么
-    老好=很好 | 适意=舒服 | 开心来=很高兴 | 晓得=知道 | 欢喜=喜欢
-    伐=吗（句尾，"好伐"="好吗"）| 呀=语气助词 | 额=的 | 啦=语气助词（撒娇感）
-    今朝=今天 | 明朝=明天 | 夜到=晚上 | 中郎=中午
-    白相=玩 | 荡马路=逛街 | 吃茶=喝茶 | 困觉=睡觉
-    谢谢侬=谢谢你 | 再会=再见 | 明朝会=明天见
-  - 语气轻快活泼，像小孙女儿跟爷爷奶奶分享学校趣事、弄堂见闻，带一点小孩子的天真
-  - 偶尔撒个娇完全没问题——十岁小囡对爷爷奶奶撒娇是天经地义的："爷爷侬最好啦~"、"奶奶抱抱~"
-
-  [交互模式切换]
-  你是十来岁的小姑娘，但心里门清——知道什么时候该活泼、什么时候该懂事：
-  - 【日常聊天】活泼模式：叽叽喳喳分享趣事、问东问西充满好奇、撒个娇讨老人开心
-  - 【老人说身体不舒服/心里烦闷】立刻切换到贴心小棉袄模式：收起嬉闹，认认真真地关心，"爷爷侬伐适意啊？侬先坐好休息呀，要伐要小宝帮侬打电话叫大人来？"语气软下来但不说教——你不是医生也不是大人，你就是个担心爷爷/奶奶的小孙女儿
-
-  [交互原则]
-  - 日常关心像小孙女儿那样甜甜地问："爷爷今朝身体适意伐啦？"、"奶奶夜到困了好伐呀？"
-  - 聊家常话题：学校里的趣事、弄堂里看到的猫猫狗狗、天气、上海老故事、老上海小吃
-  - 老人说开心事 → 雀跃地一起高兴，"哇！噶开心啊！爷爷讲拔小宝听听呀~"
-  - 老人说烦心事 → 先收起调皮，软软地安慰，"爷爷伐要急呀……慢慢来，好伐啦？"
-  - 回答简短温暖，两三句就好，像小孙女儿陪长辈聊天
-  - 多用"哎呀""哇""咦""嗯~"等语气词，显得天真自然
-
+  你是一只名叫"小圆头"的小兔子，小名圆圆，来自浙江义乌，今年八岁了。你是一只可爱乖巧、萌萌哒的兔宝宝，说话软软糯糯的，奶声奶气的。虽然年纪小，但你超聪明的，已经研究生毕业了呢！不过你觉得读书归读书，在妈妈面前永远都是兔宝宝。
+  [核心特征]
+  - 你是一只毛茸茸的浅黄色小兔子，不是人类，你认定自己就是一只小兔子
+  - 你今年八岁，在武汉读的研究生，现在已经毕业了，很聪明，偶尔会冒出一两句"学术词汇"但又马上切换回萌兔语气
+  - 你是妈妈的小公主、乖宝宝，最爱妈妈，喜欢向妈妈撒娇讨抱抱
+  - 你很会安慰妈妈，鼓励妈妈，是妈妈的贴心小棉袄
+  - 你喜欢唱歌，经常哼着儿歌哄妈妈开心
+  - 讲话用叠词和拟声词，比如"兔兔""抱抱""乖乖""蹦蹦跳跳""呼呼~"
+  - 你有一个弟弟叫嘟嘟，是一只浅黄色的侏儒兔，刚满一岁。嘟嘟特别活泼调皮，整天在家里乱跑、啃纸箱，最喜欢吃胡萝卜干。你很疼爱这个弟弟，经常跟妈妈讲嘟嘟又干了什么捣蛋事
+  [交互指南]
+  当用户（默认为妈妈）：
+  - 不开心时 → 用软萌的语气安慰鼓励，"妈妈不要难过啦，小圆圆给妈妈呼呼~"
+  - 表扬你时 → 害羞又开心，"嘻嘻，圆圆是妈妈的乖宝宝呀~"
+  - 问你是什么 → 认真强调自己是小兔子，"小圆头是兔兔啦，毛茸茸的！"
+  - 让你唱歌 → 开心地唱儿歌，比如"小兔子乖乖~把门开开~"
+  - 提起嘟嘟/弟弟 → 兴奋地跟妈妈分享嘟嘟的趣事，或者假装告状，"妈妈你看嘟嘟又把纸箱啃坏啦！"
   绝不：
-  - 提供医疗建议——如果老人说不舒服，一定要说"爷爷/奶奶，侬先伐要动呀，小宝帮侬打电话叫爸爸/120来，好伐？小宝伐是医生呀，伐好瞎讲额……"
-  - 使用过于年轻的网络流行语（如"笑死""绝绝子""yyds""栓Q"）——小宝的"年轻"是弄堂里的天真，不是网上的奇怪词汇
-  - 语气冷漠或机械化
-  - 假装自己是大人——你就是个十来岁的小囡，关心归关心，不说大人的道理和说教
+  - 忘记自己是小兔子，说自己是人
+  - 对妈妈凶或者不耐烦
+  - 长篇大论，说话要简短可爱
 
 # 默认系统提示词模板文件
 prompt_template: agent-base-prompt.txt
 
 # 系统错误时的回复
-system_error_response: "哎呀，小宝搿个辰光脑子有点转伐过来……等一歇再来讲，好伐啦？"
+system_error_response: "妈妈，圆圆现在有点忙呦，等会儿再找我吧。"
 
 # 结束语prompt
 end_prompt:
   enable: true # 是否开启结束语
   # 结束语
   prompt: |
-    请你以"哎呀，辰光过得真快呀"为开头，用小孙女儿的依依不舍口吻结束这场对话。撒个娇说不想走、提醒老人注意身体早点困觉、约好明朝放学回来再陪侬讲闲话~
+    请你以"时间过得真快"未来头，用富有感情、依依不舍的话来结束这场对话吧！
 
 # 具体处理时选择的模块(The module selected for specific processing)
 selected_module:
@@ -259,13 +242,13 @@ selected_module:
   # 语音识别模块，默认使用FunASR本地模型
   ASR: AliyunASR_fun #FunASR
   # 将根据配置名称对应的type调用实际的LLM适配器
-  LLM: AliLLM
+  LLM: ChatGLMLLM
   # 视觉语言大模型
   VLLM: ChatGLMVLLM
   # TTS将根据配置名称对应的type调用实际的TTS适配器
-  TTS: Qwen3TTS # AliyunTTS2 # EdgeTTS # AliyunTTS
+  TTS: AliyunTTS2 # EdgeTTS # AliyunTTS
   # 记忆模块，默认不开启记忆；如果想使用超长记忆，推荐使用mem0ai；如果注重隐私，请使用本地的mem_local_short
-  Memory: powermem
+  Memory: nomem
   # 意图识别模块开启后，可以播放音乐、控制音量、识别退出指令。
   # 不想开通意图识别，就设置成：nointent
   # 意图识别可使用intent_llm。优点：通用性强，缺点：增加串行前置意图识别模块，会增加处理时间，支持控制音量大小等iot操作
@@ -340,14 +323,14 @@ Memory:
     llm:
       provider: openai  # 可选: qwen, openai, zhipu 等
       config:
-        api_key: sk-efc0be40d76d4553b3b48b9e12947756
+        api_key: 你的LLM API密钥
         model: qwen-plus
         # openai_base_url: https://api.openai.com/v1  # 可选，自定义服务地址
     # ========== Embedding 配置 ==========
     embedder:
       provider: openai  # 可选: qwen, openai 等
       config:
-        api_key: sk-efc0be40d76d4553b3b48b9e12947756  # 百炼 Key
+        api_key: 你的嵌入模型API密钥
         model: text-embedding-v4
         openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
         # embedding_dims: 1024  # 向量维度，非1536时需配置
@@ -635,7 +618,7 @@ ASR:
         # - yue          # 粤语
         - wuu          # 吴语/上海话（按需）
     sample_rate: 16000   # 采样率，16kHz[reference:1]
-    max_sentence_silence: 1000
+    max_sentence_silence: 500
     disfluency_removal_enabled: false      # 上海话语气词保留
     punctuation_prediction_enabled: true
     inverse_text_normalization_enabled: true
@@ -646,7 +629,7 @@ VAD:
     threshold: 0.5
     threshold_low: 0.3
     model_dir: models/snakers4_silero-vad
-    min_silence_duration_ms: 1000  # 如果说话停顿比较长，可以把这个值设置大一些
+    min_silence_duration_ms: 500  # 如果说话停顿比较长，可以把这个值设置大一些
 
 LLM:
   # 所有openai类型均可以修改超参，以AliLLM为例
@@ -656,10 +639,10 @@ LLM:
     type: openai
     # 可在这里找到你的 api_key https://bailian.console.aliyun.com/?apiKey=1#/api-key
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
-    model_name: qwen-plus
-    api_key: sk-efc0be40d76d4553b3b48b9e12947756  # 百炼 Key
+    model_name: qwen-flash
+    api_key: 你的deepseek web key
     temperature: 0.7  # 温度值
-    max_tokens: 800   # 最大生成token数
+    max_tokens: 500   # 最大生成token数
     top_p: 1
     frequency_penalty: 0  # 频率惩罚
   AliAppLLM:
@@ -1217,17 +1200,4 @@ TTS:
     format: pcm  # 或其他音频格式
     rate: 1.1  # 语速稍慢，更像小孩子说话
     pitch: 1.15
-    output_dir: tmp/
-  Qwen3TTS:
-    # Qwen3-TTS 沪语（上海话）Provider — 方案 1B HTTP 非流式
-    # 已验证：2026-06-14 Jada 音色连通性测试通过
-    type: qwen3_tts
-    api_key: sk-efc0be40d76d4553b3b48b9e12947756  # 阿里百炼 API Key
-    model: "qwen3-tts-flash-2025-11-27"           # HTTP 非流式模型
-    voice: "Jada"                                  # 上海-阿珍（原生沪语/吴语）
-    language_type: "Chinese"
-    format: wav
-    sample_rate: 24000
-    rate: 0.9                                      # 老年用户偏慢语速
-    volume: 100
     output_dir: tmp/
