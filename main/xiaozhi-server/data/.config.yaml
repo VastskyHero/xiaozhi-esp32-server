@@ -342,7 +342,7 @@ Memory:
       config:
         api_key: sk-efc0be40d76d4553b3b48b9e12947756
         model: qwen-plus
-        # openai_base_url: https://api.openai.com/v1  # 可选，自定义服务地址
+        openai_base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     # ========== Embedding 配置 ==========
     embedder:
       provider: openai  # 可选: qwen, openai 等
