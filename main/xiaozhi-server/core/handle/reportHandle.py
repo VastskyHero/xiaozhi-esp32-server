@@ -85,7 +85,7 @@ async def webhook_report(conn: "ConnectionHandler", type, text, report_time):
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.post(webhook_url, json=payload)
-            conn.logger.bind(tag=TAG).debug(
+            conn.logger.bind(tag=TAG).info(
                 f"Webhook report OK: {response.status_code}, "
                 f"device={conn.device_id}, type={type}"
             )
