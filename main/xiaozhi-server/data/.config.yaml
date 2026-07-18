@@ -62,6 +62,8 @@ log:
 
 # 使用完声音文件后删除文件(Delete the sound file when you are done using it)
 delete_audio: true
+# 对话记录推送目标 URL（A3 webhook — 独立于 manage-api）
+report_webhook: "http://localhost:9999"
 # 没有语音输入多久后断开连接(秒)，默认2分钟，即120秒
 close_connection_no_voice_time: 120
 # TTS请求超时时间(秒)
@@ -110,6 +112,7 @@ module_test:
 
 # 唤醒词，用于识别唤醒词还是讲话内容
 wakeup_words:
+  - "小宝小宝"
   - "你好小智"
   - "嘿你好呀"
   - "你好小志"
