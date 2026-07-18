@@ -443,10 +443,7 @@ class TTSProviderBase(ABC):
                             enqueue_tts_report(self.conn, enqueue_text, enqueue_audio)
                             # Webhook push (independent of manage-api — fires in local mode too)
                             try:
-                                asyncio.run_coroutine_threadsafe(
-                                    webhook_report(self.conn, 2, enqueue_text or "", int(time.time() * 1000)),
-                                    self.conn.loop,
-                                )
+                                asyncio.run(webhook_report(self.conn, 2, enqueue_text or "", int(time.time() * 1000)))
                             except Exception:
                                 pass
                             enqueue_audio = []
@@ -457,10 +454,7 @@ class TTSProviderBase(ABC):
                             enqueue_tts_report(self.conn, enqueue_text, enqueue_audio)
                             # Webhook push (independent of manage-api — fires in local mode too)
                             try:
-                                asyncio.run_coroutine_threadsafe(
-                                    webhook_report(self.conn, 2, enqueue_text, int(time.time() * 1000)),
-                                    self.conn.loop,
-                                )
+                                asyncio.run(webhook_report(self.conn, 2, enqueue_text, int(time.time() * 1000)))
                             except Exception:
                                 pass
                         enqueue_audio = []
