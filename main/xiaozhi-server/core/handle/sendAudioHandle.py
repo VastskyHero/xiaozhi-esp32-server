@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 from core.utils import textUtils
 from core.utils.util import audio_to_data
 from core.providers.tts.dto.dto import SentenceType
+from core.handle.reportHandle import webhook_report
 from core.utils.audioRateController import AudioRateController
 
 TAG = __name__
@@ -45,6 +46,12 @@ async def sendAudioMessage(conn: "ConnectionHandler", sentenceType, audios, text
     # 发送句子开始消息
     if sentenceType is not SentenceType.MIDDLE:
         conn.logger.bind(tag=TAG).info(f"发送音频消息: {sentenceType}, {text}")
+        # Webhook push for TTS text (independent of manage-api)
+        if text:
+            try:
+                await webhook_report(conn, 2, text, int(time.time() * 1000))
+            except Exception:
+                pass
 
     # 发送结束消息（如果是最后一个文本）
     # 通话需要维持speaking状态

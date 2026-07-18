@@ -24,11 +24,11 @@ TAG = __name__
 
 
 async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
-    """Execute chat record report.
+    """Execute chat record report via manage-api.
 
-    Webhook push is independent of manage-api — it always fires when
-    report_webhook is configured, even in local mode. manage_report is
-    skipped when read_config_from_api is False to avoid connection errors.
+    Webhook push is handled independently at the ASR and TTS call sites
+    (asr/base.py and sendAudioHandle.py), not here — this avoids duplicate
+    pushes when both paths are active (API mode).
 
     Args:
         conn: ConnectionHandler instance
@@ -37,10 +37,6 @@ async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
         opus_data: Opus audio data (may be None)
         report_time: Report timestamp in milliseconds
     """
-    # Webhook push fires first and independently of manage-api
-    await webhook_report(conn, type, text, report_time)
-
-    # Manage report only when connected to management console
     if not conn.read_config_from_api:
         return
     try:
