@@ -44,10 +44,8 @@ async def sendAudioMessage(conn: "ConnectionHandler", sentenceType, audios, text
 
     await sendAudio(conn, audios)
     # 发送句子开始消息
-    if sentenceType is not SentenceType.MIDDLE:
-        conn.logger.bind(tag=TAG).info(f"发送音频消息: {sentenceType}, {text}")
-        # Webhook push for TTS text (independent of manage-api)
-        if text:
+    # Only push webhook on FIRST sentence — LAST carries duplicate text
+    if sentenceType == SentenceType.FIRST and text:
             try:
                 await webhook_report(conn, 2, text, int(time.time() * 1000))
             except Exception:

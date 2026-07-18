@@ -22,6 +22,9 @@ from config.manage_api_client import report as manage_report
 
 TAG = __name__
 
+# Dedup cache: (session_id, type, text) → last send time
+_webhook_sent = {}
+
 
 async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
     """Execute chat record report via manage-api.
@@ -68,6 +71,19 @@ async def webhook_report(conn: "ConnectionHandler", type, text, report_time):
     webhook_url = conn.config.get("report_webhook")
     if not webhook_url:
         return
+
+    # Dedup: skip if same (session, type, content) sent within 2 seconds
+    global _webhook_sent
+    _key = (conn.session_id, type, text)
+    _now = time.time()
+    if _key in _webhook_sent:
+        if _now - _webhook_sent[_key] < 2.0:
+            return
+    _webhook_sent[_key] = _now
+    # Prevent unbounded growth — prune entries older than 10s
+    if len(_webhook_sent) > 100:
+        cutoff = _now - 10.0
+        _webhook_sent = {k: v for k, v in _webhook_sent.items() if v > cutoff}
 
     import datetime
     timestamp = datetime.datetime.fromtimestamp(
