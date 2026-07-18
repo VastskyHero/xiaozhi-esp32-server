@@ -11,6 +11,7 @@ TTS上报功能已集成到ConnectionHandler类中。
 
 import time
 import json
+import httpx
 import opuslib_next
 from typing import TYPE_CHECKING
 
@@ -37,7 +38,7 @@ async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
             audio_data = opus_to_wav(conn, opus_data)
         else:
             audio_data = None
-        # 执行异步上报
+        # 执行异步上报（原有逻辑：上报到 manage-api）
         await manage_report(
             mac_address=conn.device_id,
             session_id=conn.session_id,
@@ -46,8 +47,50 @@ async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
             audio=audio_data,
             report_time=report_time,
         )
+        # 新增：webhook 推送（独立分支，不影响原有逻辑）
+        await webhook_report(conn, type, text, report_time)
     except Exception as e:
         conn.logger.bind(tag=TAG).error(f"聊天记录上报失败: {e}")
+
+
+async def webhook_report(conn: "ConnectionHandler", type, text, report_time):
+    """Push chat record to configured webhook URL (fire-and-forget).
+
+    Args:
+        conn: ConnectionHandler instance (for config and logging)
+        type: Chat type — 1=ASR(user), 2=TTS(agent), 3=tool
+        text: Text content
+        report_time: Timestamp in milliseconds
+    """
+    webhook_url = conn.config.get("report_webhook")
+    if not webhook_url:
+        return
+
+    import datetime
+    timestamp = datetime.datetime.fromtimestamp(
+        report_time / 1000.0
+    ).isoformat()
+
+    payload = {
+        "device_id": conn.device_id,
+        "session_id": conn.session_id,
+        "chat_type": type,
+        "content": text,
+        "timestamp": timestamp,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(webhook_url, json=payload)
+            conn.logger.bind(tag=TAG).debug(
+                f"Webhook report OK: {response.status_code}, "
+                f"device={conn.device_id}, type={type}"
+            )
+    except Exception as e:
+        conn.logger.bind(tag=TAG).error(
+            f"Webhook report failed (non-blocking): {e}, "
+            f"device={conn.device_id}, type={type}"
+        )
 
 
 def opus_to_wav(conn: "ConnectionHandler", opus_data):
