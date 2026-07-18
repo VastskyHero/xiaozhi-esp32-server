@@ -24,21 +24,30 @@ TAG = __name__
 
 
 async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
-    """执行聊天记录上报操作
+    """Execute chat record report.
+
+    Webhook push is independent of manage-api — it always fires when
+    report_webhook is configured, even in local mode. manage_report is
+    skipped when read_config_from_api is False to avoid connection errors.
 
     Args:
-        conn: 连接对象
-        type: 上报类型，1为用户，2为智能体，3为工具调用
-        text: 合成文本
-        opus_data: opus音频数据
-        report_time: 上报时间
+        conn: ConnectionHandler instance
+        type: Chat type — 1=ASR(user), 2=TTS(agent), 3=tool
+        text: Text content
+        opus_data: Opus audio data (may be None)
+        report_time: Report timestamp in milliseconds
     """
+    # Webhook push fires first and independently of manage-api
+    await webhook_report(conn, type, text, report_time)
+
+    # Manage report only when connected to management console
+    if not conn.read_config_from_api:
+        return
     try:
         if opus_data:
             audio_data = opus_to_wav(conn, opus_data)
         else:
             audio_data = None
-        # 执行异步上报（原有逻辑：上报到 manage-api）
         await manage_report(
             mac_address=conn.device_id,
             session_id=conn.session_id,
@@ -47,8 +56,6 @@ async def report(conn: "ConnectionHandler", type, text, opus_data, report_time):
             audio=audio_data,
             report_time=report_time,
         )
-        # 新增：webhook 推送（独立分支，不影响原有逻辑）
-        await webhook_report(conn, type, text, report_time)
     except Exception as e:
         conn.logger.bind(tag=TAG).error(f"聊天记录上报失败: {e}")
 

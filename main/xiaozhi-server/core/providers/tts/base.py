@@ -16,7 +16,7 @@ from config.logger import setup_logging
 from core.utils import opus_encoder_utils
 from core.utils.tts import MarkdownCleaner, convert_percentage_to_range
 from core.utils.output_counter import add_device_output
-from core.handle.reportHandle import enqueue_tts_report
+from core.handle.reportHandle import enqueue_tts_report, webhook_report
 from core.handle.sendAudioHandle import sendAudioMessage
 from core.utils.util import audio_bytes_to_data_stream, audio_to_data_stream
 from core.providers.tts.dto.dto import (
@@ -441,12 +441,22 @@ class TTSProviderBase(ABC):
                             enqueue_text = text
                         if sentence_type == SentenceType.LAST:
                             enqueue_tts_report(self.conn, enqueue_text, enqueue_audio)
+                            # Webhook push (independent of manage-api — fires in local mode too)
+                            try:
+                                asyncio.run(webhook_report(self.conn, 2, enqueue_text or "", int(time.time() * 1000)))
+                            except Exception:
+                                pass
                             enqueue_audio = []
                             enqueue_text = None
                     else:
                         # 非累积模式：每个句子分别上报
                         if enqueue_text is not None:
                             enqueue_tts_report(self.conn, enqueue_text, enqueue_audio)
+                            # Webhook push (independent of manage-api — fires in local mode too)
+                            try:
+                                asyncio.run(webhook_report(self.conn, 2, enqueue_text, int(time.time() * 1000)))
+                            except Exception:
+                                pass
                         enqueue_audio = []
                         enqueue_text = text
 
