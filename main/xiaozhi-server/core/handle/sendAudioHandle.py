@@ -307,7 +307,8 @@ async def send_tts_message(conn: "ConnectionHandler", state, text=None):
 
 async def send_stt_message(conn: "ConnectionHandler", text):
     """发送 STT 状态消息"""
-    end_prompt_str = conn.config.get("end_prompt", {}).get("prompt")
+    end_prompt = conn.config.get("end_prompt", {})
+    end_prompt_str = end_prompt.get("prompt") if isinstance(end_prompt, dict) else None
     if end_prompt_str and end_prompt_str == text:
         await send_tts_message(conn, "start")
         return

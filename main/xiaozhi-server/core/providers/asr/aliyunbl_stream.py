@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 import asyncio
 import websockets
@@ -50,6 +51,7 @@ class ASRProvider(ASRProviderBase):
         self.ws_url = "wss://dashscope.aliyuncs.com/api-ws/v1/inference"
 
         self.output_dir = config.get("output_dir", "./audio_output")
+        os.makedirs(self.output_dir, exist_ok=True)
         self.delete_audio_file = delete_audio_file
 
     async def open_audio_channels(self, conn):
